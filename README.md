@@ -1,4 +1,4 @@
-# TRPN
+# TPN
 ## Introduction
 A pytorch implementation of the IJCAI2020 paper "[Few-shot Visual Learning with Contextual Memory and Fine-grained Calibration](http://static.ijcai.org/2020-accepted_papers.html)". The code is based on [Edge-labeling Graph Neural Network for Few-shot Learning](https://github.com/khy0809/fewshot-egnn)
 
