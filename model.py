@@ -40,7 +40,7 @@ class CCMNet(nn.Module):
         
         for i in range(5):
             
-            m_h_1 = in_feat[:, num_supports: , :].contiguous().view(batch_size, -1).unsqueeze(0).repeat(self.num_layers, 1, 1)
+            m_h_1 = in_feat[:, num_supports: , :].contiguous().view(batch_size,-1).unsqueeze(0).repeat(self.num_layers, 1, 1)
             m_h_2 = m_h_1.clone()
             for j in range(5):
                 
@@ -56,7 +56,6 @@ class CCMNet(nn.Module):
         output_data1 = torch.cat(output_list1, 1)
         output_data2 = torch.cat(output_list2, 1)
         output_data = torch.cat([output_data1, output_data2], -1)
-#        output_data = output_data.contiguous().view(-1, in_features)
         output_data = self.fc(output_data).transpose(1,2) #(100, 25)
         #print('output_data', output_data.size())
         return output_data
