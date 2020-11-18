@@ -47,7 +47,7 @@ $ python3 train.py --dataset tiered --num_ways 5 --num_shots 1
 $ python3 train.py --dataset tiered --num_ways 5 --num_shots 5 
 
 ```
-You can download our pretrained model from [here](You can download our pretrained model from here to reproduce the results of the paper.) to reproduce the results of the paper.
+You can download our pretrained model from [here](https://drive.google.com/drive/folders/1dsjQNAAcxa8e2WIHRYi5WxRiT2tqJkbR?usp=sharing) to reproduce the results of the paper.
 ## Testing
 ``` 
 # ************************** miniImagenet, 5way 5shot *****************************
