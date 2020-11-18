@@ -1,13 +1,6 @@
 from torchtools import *
-from collections import OrderedDict
-import math
-#import seaborn as sns
-import numpy as np
-import matplotlib.pyplot as plt
-from torch.nn.parameter import Parameter
 
 
-# encoder for imagenet dataset
 class EmbeddingImagenet(nn.Module):
     def __init__(self,
                  emb_size):
@@ -27,14 +20,14 @@ class EmbeddingImagenet(nn.Module):
                                     nn.MaxPool2d(kernel_size=2),
                                     nn.LeakyReLU(negative_slope=0.2, inplace=True))
         self.conv_2 = nn.Sequential(nn.Conv2d(in_channels=self.hidden,
-                                              out_channels=int(self.hidden*1.5),
+                                              out_channels=int(self.hidden * 1.5),
                                               kernel_size=3,
                                               bias=False),
-                                    nn.BatchNorm2d(num_features=int(self.hidden*1.5)),
+                                    nn.BatchNorm2d(num_features=int(self.hidden * 1.5)),
                                     nn.MaxPool2d(kernel_size=2),
                                     nn.LeakyReLU(negative_slope=0.2, inplace=True))
-        self.conv_3 = nn.Sequential(nn.Conv2d(in_channels=int(self.hidden*1.5),
-                                              out_channels=self.hidden*2,
+        self.conv_3 = nn.Sequential(nn.Conv2d(in_channels=int(self.hidden * 1.5),
+                                              out_channels=self.hidden * 2,
                                               kernel_size=3,
                                               padding=1,
                                               bias=False),
@@ -42,8 +35,8 @@ class EmbeddingImagenet(nn.Module):
                                     nn.MaxPool2d(kernel_size=2),
                                     nn.LeakyReLU(negative_slope=0.2, inplace=True),
                                     nn.Dropout2d(0.4))
-        self.conv_4 = nn.Sequential(nn.Conv2d(in_channels=self.hidden*2,
-                                              out_channels=self.hidden*4,
+        self.conv_4 = nn.Sequential(nn.Conv2d(in_channels=self.hidden * 2,
+                                              out_channels=self.hidden * 4,
                                               kernel_size=3,
                                               padding=1,
                                               bias=False),
@@ -52,7 +45,7 @@ class EmbeddingImagenet(nn.Module):
                                     nn.LeakyReLU(negative_slope=0.2, inplace=True),
                                     nn.Dropout2d(0.5))
         self.layer_last = nn.Sequential(nn.Linear(in_features=self.last_hidden * 4,
-                                              out_features=self.emb_size, bias=True),
+                                                  out_features=self.emb_size, bias=True),
                                         nn.BatchNorm1d(self.emb_size))
 
     def forward(self, input_data):
