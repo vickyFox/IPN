@@ -98,7 +98,7 @@ class MiniImagenetLoader(data.Dataset):
         # get full class list in dataset
         full_class_list = list(self.data.keys())
         label_list = list(range(0,5))
-        random.shuffle(label_list)
+        #random.shuffle(label_list)
         # for each task
         for t_idx in range(num_tasks):
             # define task by sampling classes (num_ways)

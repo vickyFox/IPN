@@ -84,12 +84,7 @@ class ModelTrainer(object):
             for i in range(num_queries):
                 init_edge[:, 0, num_supports + i, num_supports + i] = 1.0
                 init_edge[:, 1, num_supports + i, num_supports + i] = 0.0
-
-            # for semi-supervised setting,
-            for c in range(tt.arg.num_ways_train):
-                init_edge[:, :, ((c+1) * tt.arg.num_shots_train - tt.arg.num_unlabeled):(c+1) * tt.arg.num_shots_train, :num_supports] = 0.5
-                init_edge[:, :, :num_supports, ((c+1) * tt.arg.num_shots_train - tt.arg.num_unlabeled):(c+1) * tt.arg.num_shots_train] = 0.5
-
+                
             # set as train mode
             self.enc_module.train()
             self.ccmNet_module.train()
@@ -185,11 +180,6 @@ class ModelTrainer(object):
                 init_edge[:, 0, num_supports + i, num_supports + i] = 1.0
                 init_edge[:, 1, num_supports + i, num_supports + i] = 0.0
 
-            # for semi-supervised setting,
-            for c in range(tt.arg.num_ways_test):
-                init_edge[:, :, ((c+1) * tt.arg.num_shots_test - tt.arg.num_unlabeled):(c+1) * tt.arg.num_shots_test, :num_supports] = 0.5
-                init_edge[:, :, :num_supports, ((c+1) * tt.arg.num_shots_test - tt.arg.num_unlabeled):(c+1) * tt.arg.num_shots_test] = 0.5
-
             # set as train mode
             self.enc_module.eval()
             self.ccmNet_module.eval()
@@ -202,13 +192,14 @@ class ModelTrainer(object):
             full_data_list = []
             full_data_list_4 = []
             for data in full_data_init.chunk(full_data_init.size(1), dim=1):
+                
                 output_data_4, output_data = self.enc_module(data.squeeze(1))
                 full_data_list_4.append(output_data_4)
                 full_data_list.append(output_data)
-
+                
             full_data = torch.stack(full_data_list, dim=1) # batch_size x num_samples x featdim
             full_data_4 = torch.stack(full_data_list_4, dim=1) # batch_size x num_samples x c x h x w
-          
+            #print(full_data.shape)
             query_score_list = self.ccmNet_module(in_feat=full_data, num_supports=num_supports)
 
             query_score_list = query_score_list.view(tt.arg.test_batch_size, num_queries, num_supports)
@@ -378,8 +369,6 @@ if __name__ == '__main__':
     tt.arg.dataset = 'mini' if tt.arg.dataset is None else tt.arg.dataset
     tt.arg.num_ways = 5 if tt.arg.num_ways is None else tt.arg.num_ways
     tt.arg.num_shots = 5 if tt.arg.num_shots is None else tt.arg.num_shots
-    tt.arg.num_unlabeled = 0 if tt.arg.num_unlabeled is None else tt.arg.num_unlabeled
-    tt.arg.num_layers = 3 if tt.arg.num_layers is None else tt.arg.num_layers
     tt.arg.meta_batch_size = 20 if tt.arg.meta_batch_size is None else tt.arg.meta_batch_size
     tt.arg.transductive = False if tt.arg.transductive is None else tt.arg.transductive
     tt.arg.seed = 222 if tt.arg.seed is None else tt.arg.seed
@@ -395,8 +384,6 @@ if __name__ == '__main__':
     tt.arg.test_transductive = tt.arg.transductive
 
     # model parameter related
-    tt.arg.num_edge_features = 96
-    tt.arg.num_node_features = 96
     tt.arg.emb_size = 640
 
     # train, test parameters
@@ -434,7 +421,7 @@ if __name__ == '__main__':
     enc_module = wideres(num_classes = 64)
 
     ccmNet_module = CCMNet(in_features=tt.arg.emb_size, hidden_features=tt.arg.emb_size)
-    dif_module = DifferNet(emb_size=tt.arg.emb_size)
+    dif_module = DifferNet()
 
     
 
