@@ -30,7 +30,7 @@ Because WRN has a large amount of parameters. You can save the extracted feature
 * miniImageNet: [train](https://drive.google.com/file/d/1uJ5-NhdDkdkqRhyrQoXKgkqoLt3BqWSC/view?usp=sharing), [val](https://drive.google.com/file/d/1p_6kalUR-a2so1yOGUn1DCAXL3ftgl-r/view?usp=sharing), [test](https://drive.google.com/file/d/1z69BN3ReZfSwpOt3P1l1LPDdqigKdsfT/view?usp=sharing)
 * tieredImageNet: [train](https://drive.google.com/file/d/1dGtfL8EEplJmiXGgxmQNtI36FYKyp-XG/view?usp=sharing), [val](https://drive.google.com/file/d/1DQ-LsyWtFsi6oyTxnBa5nQrla6lY7x0M/view?usp=sharing), [test](https://drive.google.com/file/d/1dGtfL8EEplJmiXGgxmQNtI36FYKyp-XG/view?usp=sharing)
 
-You also can use our [pretrained WRN model](https://drive.google.com/drive/folders/1o51s2F7_bpG2k6JOgE9loYtSRIdOH2qc) to generate features for mini or tiered by yourself
+You also can use our [pretrained WRN model](https://drive.google.com/drive/folders/1o51s2F7_bpG2k6JOgE9loYtSRIdOH2qc) to generate features for mini or tiered by yourself.
 
 ## Training
 ```

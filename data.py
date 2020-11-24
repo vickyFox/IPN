@@ -1,16 +1,18 @@
 from __future__ import print_function
-from torchtools import *
-import torch.utils.data as data
 import random
 import os
-import numpy as np
+
+import cv2
+from tqdm import tqdm
 from PIL import Image as pil_image
 import pickle
-from itertools import islice
+import torch.utils.data
 from torchvision import transforms
 
+from torchtools import *
 
-class MiniImagenetLoader(data.Dataset):
+
+class MiniImagenetLoader(torch.utils.data.Dataset):
     def __init__(self, root, partition='train'):
         super(MiniImagenetLoader, self).__init__()
         # set dataset information
@@ -41,13 +43,12 @@ class MiniImagenetLoader(data.Dataset):
         self.data = self.load_dataset()
 
     def load_dataset(self):
-        
         if tt.arg.features:
             dataset_path = os.path.join(self.root, 'tiered_WRN_%s.pickle' % self.partition)
             with open(dataset_path, 'rb') as handle:
                 data = pickle.load(handle)
             return data
-        
+
         # load data
         dataset_path = os.path.join(self.root, 'compacted_datasets/mini_imagenet_%s.pickle' % self.partition)
         with open(dataset_path, 'rb') as handle:
@@ -60,10 +61,6 @@ class MiniImagenetLoader(data.Dataset):
                 # resize
                 image_data = pil_image.fromarray(np.uint8(data[c_idx][i_idx]))
                 image_data = image_data.resize((self.data_size[2], self.data_size[1]))
-                #image_data = np.array(image_data, dtype='float32')
-
-                #image_data = np.transpose(image_data, (2, 0, 1))
-
                 # save
                 data[c_idx][i_idx] = image_data
         return data
@@ -97,8 +94,9 @@ class MiniImagenetLoader(data.Dataset):
 
         # get full class list in dataset
         full_class_list = list(self.data.keys())
-        label_list = list(range(0,5))
-        #random.shuffle(label_list)
+        label_list = list(range(0, 5))
+        random.shuffle(label_list)
+
         # for each task
         for t_idx in range(num_tasks):
             # define task by sampling classes (num_ways)
@@ -108,7 +106,6 @@ class MiniImagenetLoader(data.Dataset):
             for c_idx in range(num_ways):
                 # sample data for support and query (num_shots + num_queries)
                 class_data_list = random.sample(self.data[task_class_list[c_idx]], num_shots + num_queries)
-
 
                 # load sample for support set
                 for i_idx in range(num_shots):
@@ -124,7 +121,8 @@ class MiniImagenetLoader(data.Dataset):
                     if tt.arg.features:
                         query_data[i_idx + c_idx * num_queries][t_idx] = class_data_list[num_shots + i_idx]
                     else:
-                        query_data[i_idx + c_idx * num_queries][t_idx] = self.transform(class_data_list[num_shots + i_idx])
+                        query_data[i_idx + c_idx * num_queries][t_idx] = self.transform(
+                            class_data_list[num_shots + i_idx])
                     query_label[i_idx + c_idx * num_queries][t_idx] = c_idx
 
         # convert to tensor (num_tasks x (num_ways * (num_supports + num_queries)) x ...)
@@ -136,8 +134,7 @@ class MiniImagenetLoader(data.Dataset):
         return [support_data, support_label, query_data, query_label]
 
 
-
-class TieredImagenetLoader(data.Dataset):
+class TieredImagenetLoader(torch.utils.data.Dataset):
     def __init__(self, root, partition='train'):
         print("Tiered")
         super(TieredImagenetLoader, self).__init__()
@@ -179,14 +176,13 @@ class TieredImagenetLoader(data.Dataset):
 
         # load data
         image_dataset_path = os.path.join(self.root, 'tiered-imagenet/',
-                                    '%s_images_png.pkl' % self.partition)
+                                          '%s_images_png.pkl' % self.partition)
         label_dataset_path = os.path.join(self.root, 'tiered-imagenet/',
                                           '%s_labels.pkl' % self.partition)
 
         # for each class
-
         resized_image_dataset_path = os.path.join(self.root, 'tiered-imagenet/',
-                                          'resized_%s_images_png.pkl' % self.partition)
+                                                  'resized_%s_images_png.pkl' % self.partition)
         if os.path.isfile(resized_image_dataset_path):
             with open(resized_image_dataset_path, 'rb') as handle:
                 resized_data = pickle.load(handle)
@@ -203,14 +199,7 @@ class TieredImagenetLoader(data.Dataset):
                 # resize
                 c_idx = label['label_specific'][i_idx]
                 image_data = cv2.imdecode(data[i_idx], 1)
-                # image_data = cv2.resize(image_data, dsize=(self.data_size[2], self.data_size[1]))
                 image_data = pil_image.fromarray(np.uint8(image_data))
-                # image_data = image_data.resize((self.data_size[2], self.data_size[1]))
-                # image_data = np.array(image_data, dtype='float32')
-
-
-                # image_data = np.transpose(image_data, (2, 0, 1))
-
                 # save
                 resized_data[c_idx].append(image_data)
             print('decode %s image finished'.format(self.partition))
@@ -248,7 +237,7 @@ class TieredImagenetLoader(data.Dataset):
 
         # get full class list in dataset
         full_class_list = list(self.data.keys())
-        label_list = list(range(0,5))
+        label_list = list(range(0, 5))
         random.shuffle(label_list)
 
         # for each task
@@ -275,16 +264,14 @@ class TieredImagenetLoader(data.Dataset):
                     if tt.arg.features:
                         query_data[i_idx + c_idx * num_queries][t_idx] = class_data_list[num_shots + i_idx]
                     else:
-                        query_data[i_idx + c_idx * num_queries][t_idx] = self.transform(class_data_list[num_shots + i_idx])
+                        query_data[i_idx + c_idx * num_queries][t_idx] = self.transform(
+                            class_data_list[num_shots + i_idx])
                     query_label[i_idx + c_idx * num_queries][t_idx] = c_idx
 
         # convert to tensor (num_tasks x (num_ways * (num_supports + num_queries)) x ...)
-
         support_data = torch.stack([torch.from_numpy(data).float().cuda() for data in support_data], 1)
         support_label = torch.stack([torch.from_numpy(label).float().cuda() for label in support_label], 1)
-
         query_data = torch.stack([torch.from_numpy(query_data[i]).float().to(tt.arg.device) for i in label_list], 1)
         query_label = torch.stack([torch.from_numpy(query_label[i]).float().to(tt.arg.device) for i in label_list], 1)
-
 
         return [support_data, support_label, query_data, query_label]

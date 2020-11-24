@@ -87,15 +87,12 @@ class WideResNet(nn.Module):
         out = self.layer1(out)
         out = self.layer2(out)
         out = self.layer3(out)
-        out = F.relu(self.bn1(out))
-        out = self.avg_pool(out)
+        out_local = F.relu(self.bn1(out))
+        out = self.avg_pool(out_local)
         out = out.view(out.size(0), -1)
 
         if self.linear is None:
-            if feature:
-                return out, None
-            else:
-                return out
+            return out_local, out
         out1 = self.linear(out)
         if feature:
             return out, out1

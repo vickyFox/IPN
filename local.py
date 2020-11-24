@@ -72,14 +72,14 @@ class ImgToClassMetric(nn.Module):
         return similarity_list
 
 
-class DifferNet(nn.Module):
+class DifNet(nn.Module):
     def __init__(self):
-        super(DifferNet, self).__init__()
+        super(DifNet, self).__init__()
         self.dn4_module = DefineDN4Net()
 
-    def forward(self, input_data, feature):
+    def forward(self, feature):
         dn4_out_list = []
-        for i in range(input_data.size(0)):
+        for i in range(feature.size(0)):
             dn4_out = self.dn4_module(feature[i, 10:], feature[i, 0:5], feature[i, 5:10])
             dn4_out_list.append(dn4_out)
         dn4_out = torch.cat(dn4_out_list, 0)

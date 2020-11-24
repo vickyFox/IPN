@@ -1,10 +1,10 @@
 from torchtools import *
 
 
-class EmbeddingImagenet(nn.Module):
+class Conv4Net(nn.Module):
     def __init__(self,
                  emb_size):
-        super(EmbeddingImagenet, self).__init__()
+        super(Conv4Net, self).__init__()
         # set size
         self.hidden = 64
         self.last_hidden = self.hidden * 25
@@ -49,5 +49,6 @@ class EmbeddingImagenet(nn.Module):
                                         nn.BatchNorm1d(self.emb_size))
 
     def forward(self, input_data):
-        output_data = self.conv_4(self.conv_3(self.conv_2(self.conv_1(input_data))))
-        return self.layer_last(output_data.view(output_data.size(0), -1))
+        local_feat = self.conv_4(self.conv_3(self.conv_2(self.conv_1(input_data))))
+        global_feat = self.layer_last(local_feat.view(local_feat.size(0), -1))
+        return local_feat, global_feat
